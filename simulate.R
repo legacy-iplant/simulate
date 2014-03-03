@@ -8,21 +8,20 @@ data3 <- Data.Sim[[1]][[3]]
 
 generate <- function(minor.allele.freq=0.5,cor=0.5,
 		sim=10,y.data=data1,marker.data=data3,
-		beta.pm=c(47.71,8.96),alpha.pm=5,
-		gamma.pm=5,sigma.sq.y.pm=22.25,
+		beta.pm=c(47.71,8.96),
+		sigma.sq.y.pm=22.25,
 		sigma.sq.gamma.pm=1.44,
 		sigma.sq.alpha.pm=11.45) {
 	
-	data <- na.omit(data)
-	y <- data$length
-	x.y <- model.matrix(~treat,data=data)
+	y <- y.data$length
+	x.y <- model.matrix(~treat,data=y.data)
 	n <- length(y)
-	p <- ncol(data3)
+	p <- ncol(t(marker.data))
 
-	tab.id <- table(data$id)
+	tab.id <- table(y.data$id)
 	n.id <- length(tab.id)
 	alpha.id <- rep(1:n.id,tab.id)
-	tab.line <- table(data$line)
+	tab.line <- table(y.data$line)
 	n.line <- length(tab.line)
 	gamma.id <- rep(1:n.line,tab.line)
 	o.y <- is.na(y)
@@ -37,11 +36,12 @@ generate <- function(minor.allele.freq=0.5,cor=0.5,
 	for (i in 2:(sim+1)) {
 
 		x.l <- ep(mu=minor.allele.freq,rho=cor,n=p,nRep=n.line)[[1]]
-		#colnames(x.l) <- colnames(data3)
-		#rownames(x.l) <- rownames(data3)
+		#colnames(x.l) <- colnames(t(data3))
+		#rownames(x.l) <- rownames(t(data3))
 	
 		gamma <- rnorm(n.line,x.l%*%delta,sqrt(sigma.sq.gamma.pm))
-		eta <- x.y%*%beta.pm + alpha.pm[alpha.id] + gamma[gamma.id]
+		alpha <- rnorm(n.id,0,sqrt(sigma.sq.alpha.pm))
+		eta <- x.y%*%beta.pm + alpha[alpha.id] + gamma[gamma.id]
 		y.sim <- rnorm(n,eta,sqrt(sigma.sq.y.pm))
 		y.sim[o.y==TRUE] <- NA
 
