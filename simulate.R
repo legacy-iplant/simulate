@@ -1,4 +1,4 @@
-setwd("/users/dustin/desktop")
+setwd("/users/dustin/documents/simulate")
 load("Data.Sim.50.Rdata")
 require(mvtBinaryEP)
 
@@ -6,7 +6,7 @@ data1 <- Data.Sim[[1]][[1]]
 data2 <- Data.Sim[[1]][[2]]
 data3 <- Data.Sim[[1]][[3]]
 
-generate <- function(minor.allele.freq=0.5,cor=0.5,
+main <- function(minor.allele.freq=0.5,cor=0.5,
 		sim=10,y.data=data1,marker.data=data3,
 		beta.pm=c(47.71,8.96),
 		sigma.sq.y.pm=22.25,
