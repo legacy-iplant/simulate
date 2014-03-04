@@ -1,19 +1,43 @@
-setwd("/users/dustin/documents/simulate")
-load("Data.Sim.50.Rdata")
+#setwd("/users/dustin/documents/simulate")
 require(mvtBinaryEP)
+require(getopt)
+args <- commandArgs(TRUE)
 
-data1 <- Data.Sim[[1]][[1]]
-data2 <- Data.Sim[[1]][[2]]
-data3 <- Data.Sim[[1]][[3]]
+options <- matrix(c("ydata","a",1,"character",
+			"markerdata","b",1,"character",
+			"maf","c",1,"double",
+			"cor","d",1,"double",
+			"sim","e",1,"integer",
+			"yname","f",1,"character",
+			"mu","g",1,"double",
+			"beta","h",1,"double",
+			"sigmay","i",1,"double",
+			"sigmagamma","j",1,"double",
+			"sigmaalpha","k",1,"double"),
+			ncol=4,byrow=TRUE)
 
-main <- function(minor.allele.freq=0.5,cor=0.5,
-		sim=10,y.data=data1,marker.data=data3,
-		beta.pm=c(47.71,8.96),
-		sigma.sq.y.pm=22.25,
-		sigma.sq.gamma.pm=1.44,
-		sigma.sq.alpha.pm=11.45) {
+ret.opts <- getopt(options,args)
+ydata <- ret.opts$ydata
+markerdata <- ret.opts$markerdata
+maf <- ret.opts$maf
+dcor <- ret.opts$cor
+dsim <- ret.opts$sim
+yname <- ret.opts$yname
+dmu <- ret.opts$mu
+dbeta <- ret.opts$beta
+dsigmay <- ret.opts$sigmay
+dsigmagamma <- ret.opts$sigmagamma
+dsigmaalpha <- ret.opts$sigmaalpha
+
+main <- function(minor.allele.freq=maf,cor=dcor,
+		sim=dsim,y.data=ydata,marker.data=markerdata,
+		beta.pm=c(dmu,dbeta),
+		sigma.sq.y.pm=dsigmay,
+		sigma.sq.gamma.pm=dsigmagamma,
+		sigma.sq.alpha.pm=dsigmaalpha,
+		y.name=yname) {
 	
-	y <- y.data$length
+	y <- y.data$y.name
 	x.y <- model.matrix(~treat,data=y.data)
 	n <- length(y)
 	p <- ncol(t(marker.data))
@@ -36,8 +60,8 @@ main <- function(minor.allele.freq=0.5,cor=0.5,
 	for (i in 2:(sim+1)) {
 
 		x.l <- ep(mu=minor.allele.freq,rho=cor,n=p,nRep=n.line)[[1]]
-		#colnames(x.l) <- colnames(t(data3))
-		#rownames(x.l) <- rownames(t(data3))
+		colnames(x.l) <- colnames(t(data3))
+		rownames(x.l) <- rownames(t(data3))
 	
 		gamma <- rnorm(n.line,x.l%*%delta,sqrt(sigma.sq.gamma.pm))
 		alpha <- rnorm(n.id,0,sqrt(sigma.sq.alpha.pm))
@@ -55,4 +79,13 @@ main <- function(minor.allele.freq=0.5,cor=0.5,
 
 	return(data.sim)
 
+}
+
+thedata <- main()
+
+for (i in 1:(sim+1)) {
+	write.csv(x=thedata[[i]][[1]],col.names=FALSE,row.names=FALSE,
+		file=paste("sim_",i,"_ydata.csv",sep=""))
+	write.csv(x=thedata[[i]][[2]],col.names=FALSE,row.names=FALSE,
+		file=paste("sim_",i,"_markerdata.csv",sep=""))
 }
