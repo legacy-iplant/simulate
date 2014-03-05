@@ -1,4 +1,5 @@
 #setwd("/users/dustin/documents/simulate")
+#options(error = quote({dump.frames(to.file=TRUE); q()}))
 require(mvtBinaryEP)
 require(getopt)
 args <- commandArgs(TRUE)
@@ -13,10 +14,12 @@ options <- matrix(c("ydata","a",1,"character",
 			"beta","h",1,"double",
 			"sigmay","i",1,"double",
 			"sigmagamma","j",1,"double",
-			"sigmaalpha","k",1,"double"),
+			"sigmaalpha","k",1,"double",
+			"sep","l",1,"character"),
 			ncol=4,byrow=TRUE)
 
 ret.opts <- getopt(options,args)
+seperator <- ret.opts$sep
 ydata <- ret.opts$ydata
 markerdata <- ret.opts$markerdata
 maf <- ret.opts$maf
@@ -29,6 +32,9 @@ dsigmay <- ret.opts$sigmay
 dsigmagamma <- ret.opts$sigmagamma
 dsigmaalpha <- ret.opts$sigmaalpha
 
+ydata <- read.table(file=ydata,sep=seperator,header=TRUE)
+markerdata <- read.table(file=markerdata,sep=seperator,header=TRUE)
+
 main <- function(minor.allele.freq=maf,cor=dcor,
 		sim=dsim,y.data=ydata,marker.data=markerdata,
 		beta.pm=c(dmu,dbeta),
@@ -37,7 +43,7 @@ main <- function(minor.allele.freq=maf,cor=dcor,
 		sigma.sq.alpha.pm=dsigmaalpha,
 		y.name=yname) {
 	
-	y <- y.data$y.name
+	y <- eval(parse(text=paste(y.data,y.name,sep="$")))
 	x.y <- model.matrix(~treat,data=y.data)
 	n <- length(y)
 	p <- ncol(t(marker.data))
@@ -60,8 +66,8 @@ main <- function(minor.allele.freq=maf,cor=dcor,
 	for (i in 2:(sim+1)) {
 
 		x.l <- ep(mu=minor.allele.freq,rho=cor,n=p,nRep=n.line)[[1]]
-		colnames(x.l) <- colnames(t(data3))
-		rownames(x.l) <- rownames(t(data3))
+		#colnames(x.l) <- colnames(t(markerdata))
+		rownames(x.l) <- rownames(t(markerdata))
 	
 		gamma <- rnorm(n.line,x.l%*%delta,sqrt(sigma.sq.gamma.pm))
 		alpha <- rnorm(n.id,0,sqrt(sigma.sq.alpha.pm))
@@ -83,7 +89,7 @@ main <- function(minor.allele.freq=maf,cor=dcor,
 
 thedata <- main()
 
-for (i in 1:(sim+1)) {
+for (i in 2:(sim+1)) {
 	write.csv(x=thedata[[i]][[1]],col.names=FALSE,row.names=FALSE,
 		file=paste("sim_",i,"_ydata.csv",sep=""))
 	write.csv(x=thedata[[i]][[2]],col.names=FALSE,row.names=FALSE,
