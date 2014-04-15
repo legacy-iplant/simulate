@@ -1,47 +1,33 @@
-#setwd("/users/dustin/documents/simulate")
-#options(error = quote({dump.frames(to.file=TRUE); q()}))
 require(mvtBinaryEP)
 require(getopt)
-args <- commandArgs(TRUE)
 
-options <- matrix(c("ydata","a",1,"character",
-			"markerdata","b",1,"character",
-			"maf","c",1,"double",
-			"cor","d",1,"double",
-			"sim","e",1,"integer",
-			"yname","f",1,"character",
-			"mu","g",1,"double",
-			"beta","h",1,"double",
-			"sigmay","i",1,"double",
-			"sigmagamma","j",1,"double",
-			"sigmaalpha","k",1,"double",
-			"sep","l",1,"character"),
-			ncol=4,byrow=TRUE)
-
-ret.opts <- getopt(options,args)
-seperator <- ret.opts$sep
-ydata <- ret.opts$ydata
-markerdata <- ret.opts$markerdata
-maf <- ret.opts$maf
-dcor <- ret.opts$cor
-dsim <- ret.opts$sim
-yname <- ret.opts$yname
-dmu <- ret.opts$mu
-dbeta <- ret.opts$beta
-dsigmay <- ret.opts$sigmay
-dsigmagamma <- ret.opts$sigmagamma
-dsigmaalpha <- ret.opts$sigmaalpha
+seperator <- ","
+ydata <- "data1.csv"
+markerdata <- "data2.csv"
+maf <- 0.5
+dcor <- 0.5
+dsim <- 3
+yname <- "length"
+dmu <- 11
+dbeta <- 8
+dsigmay <- 5
+dsigmagamma <- 4
+dsigmaalpha <- 4
 
 ydata <- read.table(file=ydata,sep=seperator,header=TRUE)
 markerdata <- read.table(file=markerdata,sep=seperator,header=TRUE)
 
-main <- function(minor.allele.freq=maf,cor=dcor,
-		sim=dsim,y.data=ydata,marker.data=markerdata,
-		beta.pm=c(dmu,dbeta),
-		sigma.sq.y.pm=dsigmay,
-		sigma.sq.gamma.pm=dsigmagamma,
-		sigma.sq.alpha.pm=dsigmaalpha,
-		y.name=yname) {
+#main <- function(
+		minor.allele.freq=maf
+		cor=dcor
+		sim=dsim
+		y.data=ydata
+		marker.data=markerdata
+		beta.pm=c(dmu,dbeta)
+		sigma.sq.y.pm=dsigmay
+		sigma.sq.gamma.pm=dsigmagamma
+		sigma.sq.alpha.pm=dsigmaalpha
+		y.name=yname
 	
 	y.data <- as.data.frame(y.data)
 	y <- eval(parse(text=paste("y.data",y.name,sep="$")))
@@ -84,21 +70,12 @@ main <- function(minor.allele.freq=maf,cor=dcor,
 
 		pheno.sim <- y.data
 		pheno.sim$length <- y.sim
-		names(pheno.sim)[1] <- "y"
+		#names(pheno.sim)[1] <- "y"
 		data.sim[[i]][[1]] <- pheno.sim
 		data.sim[[i]][[2]] <- t(x.l)
 
 	}
 
-	return(data.sim)
+	#return(data.sim)
 
-}
-
-thedata <- main()
-
-for (i in 2:(thedata[[1]][[4]]+1)) {
-	write.csv(x=thedata[[i]][[1]],row.names=FALSE,
-		file=paste("sim_",i,"_ydata.csv",sep=""))
-	write.csv(x=thedata[[i]][[2]],row.names=FALSE,
-		file=paste("sim_",i,"_markerdata.csv",sep=""))
-}
+#}

@@ -48,11 +48,7 @@ main <- function(minor.allele.freq=maf,cor=dcor,
 	x.y <- model.matrix(~treat,data=y.data)
 	n <- length(y)
 	p <- ncol(t(marker.data))
-	marker.names <- markerdata[,1]
-	line.names <- colnames(markerdata)
-	my.cor <- cor(t(markerdata[,2:ncol(markerdata)]))
-	colnames(my.cor) <- marker.names
-	rownames(my.cor) <- marker.names
+	print(head(marker.data[,1:6]))
 
 	tab.id <- table(y.data$id)
 	n.id <- length(tab.id)

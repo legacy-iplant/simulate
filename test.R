@@ -10,31 +10,23 @@ print(sqrt(diag(MSE * solve(t(X)%*%X))))
 X <- cbind(iris[,1:4])
 N = nrow(X)
 B = 1000
+num.coef <- 4
 
 ## Bootstrapping
-bootstrap <- function(model,X,B,num.coef,other,otherwhat) {
-	if (is.null(tryCatch(nrow(X))))
-		N <- length(X) else {N <- nrow(X)}
+#bootstrap <- function(model,X,B,num.coef) {
+	N <- length(X)
 	sim = list()
 	for (r in 1:B) {
 		newX <- list()
 		newX <- sample(1:N,N,replace=TRUE)
-		if (is.null(tryCatch(nrow(X))))
-			newX <- as.data.frame(X[newX]) else {
-				newX <- as.data.frame(X[newX,])
-			}
+		newX <- as.data.frame(X[newX,]) 
 		fit <- eval(parse(text=paste(model)))
-		if (other) 
-			sim[[r]] <- eval(parse(text=
-				paste("fit",otherwhat,sep="$"))) else {
-				sim[[r]] <- fit
-			}
+		sim[[r]] <- fit$coefficients
 	}
 
 	se <- list()
 	test <- list()
-	if (num.coef>1) {
-	for (j in 1:num.coef) {
+	for (j in 1:4) {
 		for (i in 1:B) {
 			test[[i]] <- sim[[i]][j]
 		}
@@ -43,16 +35,7 @@ bootstrap <- function(model,X,B,num.coef,other,otherwhat) {
 	}
 	se <- unlist(se)
 	return(se)
-	}
-	else {
-		for (i in 1:B) {
-			test[[i]] <- sim[[i]]
-		}
-		se <- append(se,sd(test))
-		se <- unlist(se)
-		return(se)
-	}
-}
+#}
 
 standard.errors <- bootstrap("lm(Sepal.Width~.,data=newX)",X,1000,4)
 print(standard.errors)
